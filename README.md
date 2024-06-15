@@ -21,5 +21,5 @@ This project is a stock screener tool built with Python 3.8. It identifies the b
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/your-username/stock-screener.git
-   cd stock-screener
+   git clone https://github.com/dreyhsu/TWSectorScreener.git
+   cd TWSectorScreener
