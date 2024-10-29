@@ -14,6 +14,7 @@ from selenium.webdriver.edge.service import Service
 from selenium.webdriver.edge.options import Options
 
 fig_folder_path = r'fig'
+driver_path = r'driver\edgedriver_win32\msedgedriver.exe'
 
 def delete_gif_in_fig_folder():
     # List all files in the folder
@@ -24,29 +25,24 @@ def delete_gif_in_fig_folder():
             os.remove(os.path.join(fig_folder_path, file))
 
 def twscreener():
-    # Run selenium_crawl to get screener stocks list df
-    selenium_crawl()
-    # headers = {
-    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-    #                   ' Chrome/65.0.3325.181 Safari/537.36'
-    # }
-
-    df = pd.read_pickle('data/screener_data.pkl')
-    df = df.loc[df['代號'].apply(lambda x: len(str(x)) == 4)]
-
-    # Set up the Selenium Edge WebDriver
-    driver_path = r'driver\edgedriver_win32\msedgedriver.exe'
+    user_agent = random.choice(user_agents_list)
     # Set up Edge options
     options = Options()
     options.add_argument('--headless')  # Run in headless mode
+    options.add_argument(f'user-agent={user_agent}')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-
     # Instantiate the Edge WebDriver with the service and options
     service = Service(executable_path=driver_path)
     driver = webdriver.Edge(service=service, options=options)
 
     try:
+        # Run selenium_crawl to get screener stocks list df
+        print("Fetching screener list...")
+        selenium_crawl(driver=driver)
+        df = pd.read_pickle('data/screener_data.pkl')
+        df = df.loc[df['代號'].apply(lambda x: len(str(x)) == 4)]
+
         # Loop over df['代號'] and get stock info to add to df
         print("Fetching stock info...")
         industry_list = []
@@ -70,6 +66,7 @@ def twscreener():
     df['產業別'] = industry_list
     df['主要業務'] = main_service_list
     df.to_pickle('data/screener_data.pkl')
+    df.to_csv('data/screener_data.csv', index=False, encoding='utf-8-sig')
     
     # Proceed to download GIFs
     def download_fig(filename, url):
