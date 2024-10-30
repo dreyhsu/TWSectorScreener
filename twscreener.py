@@ -38,10 +38,14 @@ def twscreener():
 
     try:
         # Run selenium_crawl to get screener stocks list df
-        print("Fetching screener list...")
-        selenium_crawl(driver=driver)
-        df = pd.read_pickle('data/screener_data.pkl')
-        df = df.loc[df['代號'].apply(lambda x: len(str(x)) == 4)]
+        # print("Fetching screener list...")
+        # selenium_crawl(driver=driver)
+        # df = pd.read_pickle('data/screener_data.pkl')
+        print("Fetching high return list...")
+        df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
+        df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
+        df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
+        df = df.iloc[:40, :]
 
         # Loop over df['代號'] and get stock info to add to df
         print("Fetching stock info...")
@@ -98,19 +102,19 @@ def twscreener():
 
     delete_gif_in_fig_folder()
     print("Downloading price trend charts...")
-    for stock_id in list(df['代號'].unique()):
+    for i, stock_id in enumerate(list(df['代號'].unique())):
         for fig_type in ['WEEK', 'DATE']:
             url = f'https://goodinfo.tw/tw/image/StockPrice/PRICE_{fig_type}_{stock_id}.gif'
             url += '?t=' + datetime.now().isoformat()
-            filename = f'{fig_folder_path}/{stock_id}_{fig_type}.gif'
+            filename = f'{fig_folder_path}/{i+1}_{stock_id}_{fig_type}.gif'
             download_fig(filename, url)
             change_background_color(filename, filename)
             time.sleep(2)
     print("Downloading foreign holding trend charts...")
-    for stock_id in list(df['代號'].unique()):
+    for i, stock_id in enumerate(list(df['代號'].unique())):
         url = f'https://goodinfo.tw/tw/image/StockBuySale/BUY_SALE_DATE_{stock_id}.gif'
         url += '?t=' + datetime.now().isoformat()
-        filename = f'{fig_folder_path}/{stock_id}_BUY_SALE_DATE.gif'
+        filename = f'{fig_folder_path}/{i+1}_{stock_id}_BUY_SALE_DATE.gif'
         download_fig(filename, url)
         change_background_color(filename, filename)
         time.sleep(2)
