@@ -38,14 +38,15 @@ def twscreener():
 
     try:
         # Run selenium_crawl to get screener stocks list df
-        # print("Fetching screener list...")
-        # selenium_crawl(driver=driver)
-        # df = pd.read_pickle('data/screener_data.pkl')
-        print("Fetching high return list...")
-        df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
-        df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
-        df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
-        df = df.iloc[:40, :]
+        print("Fetching screener list...")
+        selenium_crawl(driver=driver)
+        df = pd.read_pickle('data/screener_data.pkl')
+
+        # print("Fetching high return list...")
+        # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
+        # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
+        # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
+        # df = df.iloc[:40, :]
 
         # Loop over df['代號'] and get stock info to add to df
         print("Fetching stock info...")
