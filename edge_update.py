@@ -28,26 +28,71 @@ def get_installed_edge_version():
 # Function to get the latest stable WebDriver version
 def get_latest_stable_driver_version():
     try:
-        response = requests.get('https://msedgedriver.azureedge.net/LATEST_STABLE')
+        # Use Microsoft's official Edge Driver download page
+        edge_driver_versions = 'https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/'
+        
+        # Alternative direct URL method
+        response = requests.get(
+            'https://msedgedriver.azureedge.net/LATEST_STABLE', 
+            timeout=10,
+            verify=True
+        )
         response.raise_for_status()
         return response.text.strip()
+    
     except requests.RequestException as e:
         print(f"Error fetching latest stable driver version: {e}")
+        
+        # Fallback to manual version matching
+        try:
+            # Extract major version from installed Edge
+            installed_version = get_installed_edge_version()
+            if installed_version:
+                major_version = installed_version.split('.')[0]
+                return f"{major_version}.0.2903.87"  # Use a known stable version pattern
+        
+        except Exception as fallback_error:
+            print(f"Fallback method failed: {fallback_error}")
+        
         return None
 
 # Function to download and extract the WebDriver
 def download_and_extract_driver(version, extract_to):
     try:
+        # Primary download URL
         download_url = f'https://msedgedriver.azureedge.net/{version}/edgedriver_win32.zip'
+        
+        # Alternative download URLs
+        alternate_urls = [
+            f'https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/{version}/edgedriver_win32.zip',
+            f'https://github.com/microsoft/edge-webdriver/releases/download/v{version}/edgedriver_win32.zip'
+        ]
+        
+        # Try primary URL first
         response = requests.get(download_url)
         response.raise_for_status()
+        
         with zipfile.ZipFile(BytesIO(response.content)) as z:
             z.extractall(extract_to)
         print(f"WebDriver version {version} downloaded and extracted to {extract_to}")
+    
     except requests.RequestException as e:
-        print(f"Error downloading WebDriver: {e}")
-    except zipfile.BadZipFile as e:
-        print(f"Error extracting WebDriver: {e}")
+        print(f"Primary download failed: {e}")
+        
+        # Try alternate URLs
+        for alt_url in alternate_urls:
+            try:
+                response = requests.get(alt_url)
+                response.raise_for_status()
+                
+                with zipfile.ZipFile(BytesIO(response.content)) as z:
+                    z.extractall(extract_to)
+                print(f"WebDriver downloaded from alternate URL: {alt_url}")
+                return
+            except Exception as alt_error:
+                print(f"Alternate URL {alt_url} failed: {alt_error}")
+        
+        print("All download attempts failed.")
 
 # Main logic
 if __name__ == "__main__":

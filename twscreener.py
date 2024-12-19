@@ -1,5 +1,6 @@
 from crawl_screener import selenium_crawl
 from crawl_stock_info import get_stock_info
+from gif_to_png import gif2png
 import requests
 import pandas as pd
 from datetime import datetime
@@ -49,29 +50,29 @@ def twscreener():
         # df = df.iloc[:40, :]
 
         # Loop over df['代號'] and get stock info to add to df
-        print("Fetching stock info...")
-        industry_list = []
-        main_service_list = []
+        # print("Fetching stock info...")
+        # industry_list = []
+        # main_service_list = []
 
-        for stock_id in df['代號']:
-            stock_info = get_stock_info(stock_id, driver=driver)
-            if stock_info is not None:
-                industry = stock_info['產業別'].iloc[0]
-                main_service = stock_info['主要業務'].iloc[0]
-            else:
-                industry = None
-                main_service = None
-            industry_list.append(industry)
-            main_service_list.append(main_service)
-            time.sleep(1)  # Sleep to avoid overwhelming the server
+        # for stock_id in df['代號']:
+        #     stock_info = get_stock_info(stock_id, driver=driver)
+        #     if stock_info is not None:
+        #         industry = stock_info['產業別'].iloc[0]
+        #         main_service = stock_info['主要業務'].iloc[0]
+        #     else:
+        #         industry = None
+        #         main_service = None
+        #     industry_list.append(industry)
+        #     main_service_list.append(main_service)
+        #     time.sleep(1)  # Sleep to avoid overwhelming the server
 
     finally:
         driver.quit()
 
-    df['產業別'] = industry_list
-    df['主要業務'] = main_service_list
-    df.to_pickle('data/screener_data.pkl')
-    df.to_csv('data/screener_data.csv', index=False, encoding='utf-8-sig')
+    # df['產業別'] = industry_list
+    # df['主要業務'] = main_service_list
+    # df.to_pickle('data/screener_data.pkl')
+    # df.to_csv('data/screener_data.csv', index=False, encoding='utf-8-sig')
     
     # Proceed to download GIFs
     def download_fig(filename, url):
@@ -83,23 +84,28 @@ def twscreener():
             f.write(response.content)
 
     def change_background_color(input_path, output_path):
-        with Image.open(input_path) as img:
-            frames = [frame.copy() for frame in ImageSequence.Iterator(img)]
+        try:
+            with Image.open(input_path) as img:
+                frames = [frame.copy() for frame in ImageSequence.Iterator(img)]
 
-            # Create a new sequence of frames with white background
-            new_frames = []
-            for frame in frames:
-                # Convert the frame to RGBA if it's not already in that mode
-                if frame.mode != 'RGBA':
-                    frame = frame.convert('RGBA')
-                
-                # Create a new image with a white background
-                new_frame = Image.new('RGBA', frame.size, (255, 255, 255))
-                new_frame.paste(frame, (0, 0), frame)
-                new_frames.append(new_frame)
+                # Create a new sequence of frames with white background
+                new_frames = []
+                for frame in frames:
+                    # Convert the frame to RGBA if it's not already in that mode
+                    if frame.mode != 'RGBA':
+                        frame = frame.convert('RGBA')
+                    
+                    # Create a new image with a white background
+                    new_frame = Image.new('RGBA', frame.size, (255, 255, 255))
+                    new_frame.paste(frame, (0, 0), frame)
+                    new_frames.append(new_frame)
 
-            # Save the modified frames as a new GIF
-            new_frames[0].save(output_path, save_all=True, append_images=new_frames[1:], loop=0)
+                # Save the modified frames as a new GIF
+                new_frames[0].save(output_path, save_all=True, append_images=new_frames[1:], loop=0)
+        except:
+            pass
+
+
 
     delete_gif_in_fig_folder()
     print("Downloading price trend charts...")
