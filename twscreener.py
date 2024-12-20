@@ -1,6 +1,6 @@
 from crawl_screener import selenium_crawl
 from crawl_stock_info import get_stock_info
-from gif_to_png import gif2png
+from finmind_data_download import finmind_data_download
 import requests
 import pandas as pd
 from datetime import datetime
@@ -22,53 +22,53 @@ def delete_gif_in_fig_folder():
     file_list = os.listdir(fig_folder_path)
     # Iterate through the files and delete those with the .gif extension
     for file in file_list:
-        if file.endswith(".gif"):
+        if file.endswith(".png"):
             os.remove(os.path.join(fig_folder_path, file))
 
 def twscreener():
-    user_agent = random.choice(user_agents_list)
-    # Set up Edge options
-    options = Options()
-    options.add_argument('--headless')  # Run in headless mode
-    options.add_argument(f'user-agent={user_agent}')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    # Instantiate the Edge WebDriver with the service and options
-    service = Service(executable_path=driver_path)
-    driver = webdriver.Edge(service=service, options=options)
+    # user_agent = random.choice(user_agents_list)
+    # # Set up Edge options
+    # options = Options()
+    # options.add_argument('--headless')  # Run in headless mode
+    # options.add_argument(f'user-agent={user_agent}')
+    # options.add_argument('--no-sandbox')
+    # options.add_argument('--disable-dev-shm-usage')
+    # # Instantiate the Edge WebDriver with the service and options
+    # service = Service(executable_path=driver_path)
+    # driver = webdriver.Edge(service=service, options=options)
 
-    try:
-        # Run selenium_crawl to get screener stocks list df
-        print("Fetching screener list...")
-        selenium_crawl(driver=driver)
-        df = pd.read_pickle('data/screener_data.pkl')
+    # try:
+    #     # Run selenium_crawl to get screener stocks list df
+    #     print("Fetching screener list...")
+    #     # selenium_crawl(driver=driver)
+    #     df = pd.read_pickle('data/screener_data.pkl')
 
-        # print("Fetching high return list...")
-        # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
-        # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
-        # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
-        # df = df.iloc[:40, :]
+    #     # print("Fetching high return list...")
+    #     # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
+    #     # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
+    #     # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
+    #     # df = df.iloc[:40, :]
 
-        # Loop over df['代號'] and get stock info to add to df
-        # print("Fetching stock info...")
-        # industry_list = []
-        # main_service_list = []
+    #     # Loop over df['代號'] and get stock info to add to df
+    #     # print("Fetching stock info...")
+    #     # industry_list = []
+    #     # main_service_list = []
 
-        # for stock_id in df['代號']:
-        #     stock_info = get_stock_info(stock_id, driver=driver)
-        #     if stock_info is not None:
-        #         industry = stock_info['產業別'].iloc[0]
-        #         main_service = stock_info['主要業務'].iloc[0]
-        #     else:
-        #         industry = None
-        #         main_service = None
-        #     industry_list.append(industry)
-        #     main_service_list.append(main_service)
-        #     time.sleep(1)  # Sleep to avoid overwhelming the server
+    #     # for stock_id in df['代號']:
+    #     #     stock_info = get_stock_info(stock_id, driver=driver)
+    #     #     if stock_info is not None:
+    #     #         industry = stock_info['產業別'].iloc[0]
+    #     #         main_service = stock_info['主要業務'].iloc[0]
+    #     #     else:
+    #     #         industry = None
+    #     #         main_service = None
+    #     #     industry_list.append(industry)
+    #     #     main_service_list.append(main_service)
+    #     #     time.sleep(1)  # Sleep to avoid overwhelming the server
 
-    finally:
-        driver.quit()
-
+    # finally:
+    #     driver.quit()
+    df = pd.read_pickle('data/screener_data.pkl')
     # df['產業別'] = industry_list
     # df['主要業務'] = main_service_list
     # df.to_pickle('data/screener_data.pkl')
@@ -109,22 +109,24 @@ def twscreener():
 
     delete_gif_in_fig_folder()
     print("Downloading price trend charts...")
-    for i, stock_id in enumerate(list(df['代號'].unique())):
-        for fig_type in ['WEEK', 'DATE']:
-            url = f'https://goodinfo.tw/tw/image/StockPrice/PRICE_{fig_type}_{stock_id}.gif'
-            url += '?t=' + datetime.now().isoformat()
-            filename = f'{fig_folder_path}/{i+1}_{stock_id}_{fig_type}.gif'
-            download_fig(filename, url)
-            change_background_color(filename, filename)
-            time.sleep(2)
-    print("Downloading foreign holding trend charts...")
-    for i, stock_id in enumerate(list(df['代號'].unique())):
-        url = f'https://goodinfo.tw/tw/image/StockBuySale/BUY_SALE_DATE_{stock_id}.gif'
-        url += '?t=' + datetime.now().isoformat()
-        filename = f'{fig_folder_path}/{i+1}_{stock_id}_BUY_SALE_DATE.gif'
-        download_fig(filename, url)
-        change_background_color(filename, filename)
-        time.sleep(2)
+    finmind_data_download(list(df['代號'].unique()))
+    
+    # for i, stock_id in enumerate(list(df['代號'].unique())):
+    #     for fig_type in ['WEEK', 'DATE']:
+    #         url = f'https://goodinfo.tw/tw/image/StockPrice/PRICE_{fig_type}_{stock_id}.gif'
+    #         url += '?t=' + datetime.now().isoformat()
+    #         filename = f'{fig_folder_path}/{i+1}_{stock_id}_{fig_type}.gif'
+    #         download_fig(filename, url)
+    #         change_background_color(filename, filename)
+    #         time.sleep(2)
+    # print("Downloading foreign holding trend charts...")
+    # for i, stock_id in enumerate(list(df['代號'].unique())):
+    #     url = f'https://goodinfo.tw/tw/image/StockBuySale/BUY_SALE_DATE_{stock_id}.gif'
+    #     url += '?t=' + datetime.now().isoformat()
+    #     filename = f'{fig_folder_path}/{i+1}_{stock_id}_BUY_SALE_DATE.gif'
+    #     download_fig(filename, url)
+    #     change_background_color(filename, filename)
+    #     time.sleep(2)
     
     print('Finished.')
 
