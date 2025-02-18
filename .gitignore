@@ -1,3 +1,8 @@
 .env
 gpt_question.txt
 data/
+_pycache_/
+driver/
+*.markdown
+*.ipynb
+*.csv

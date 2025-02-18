@@ -104,7 +104,7 @@ class StockDataManager:
         ax.bar(down['x_position'], down['close'] - down['open'], width, bottom=down['open'], color='green', alpha=0.7)
         ax.vlines(down['x_position'], down['min'], down['max'], color='green', linewidth=1)
     
-    def plot_stock_chart(self, df, stock_id, timeframe='D'):
+    def plot_stock_chart(self, df, stock_id, stock_name, timeframe='D'):
         """Create and save stock chart with indicators"""
         # Calculate indicators
         df['MA20'] = df['close'].rolling(window=20).mean()
@@ -129,7 +129,7 @@ class StockDataManager:
         
         # Customize price subplot
         timeframe_text = 'Daily' if timeframe == 'D' else 'Weekly'
-        ax1.set_title(f'Stock {stock_id} {timeframe_text} Technical Analysis', pad=20)
+        ax1.set_title(f'Stock {stock_id} {stock_name} {timeframe_text} Technical Analysis', pad=20)
         ax1.grid(True, linestyle=':', alpha=0.6)
         ax1.legend()
         
@@ -149,12 +149,12 @@ class StockDataManager:
         
         # Adjust layout and save
         plt.tight_layout()
-        plt.savefig(f'fig/{stock_id}_{timeframe}_chart.png')
+        plt.savefig(f'fig/{stock_id}_{stock_name}_{timeframe}_chart.png')
         plt.close()
     
-    def process_stock_list(self, stock_list):
+    def process_stock_list(self, stock_dict):
         """Process a list of stocks"""
-        for stock_id in stock_list:
+        for stock_id in stock_dict.keys():
             try:
                 print(f"Processing stock {stock_id}...")
                 # Load and update data
@@ -164,20 +164,20 @@ class StockDataManager:
                 weekly_df = self.resample_to_weekly(daily_df.copy())
                 
                 # Plot daily chart
-                self.plot_stock_chart(daily_df, stock_id, timeframe='D')
+                self.plot_stock_chart(daily_df, stock_id, stock_dict[stock_id], timeframe='D')
                 
                 # Plot weekly chart
-                self.plot_stock_chart(weekly_df, stock_id, timeframe='W')
+                self.plot_stock_chart(weekly_df, stock_id, stock_dict[stock_id], timeframe='W')
                 
                 print(f"Successfully processed stock {stock_id}")
             except Exception as e:
                 print(f"Error processing stock {stock_id}: {str(e)}")
                 
 
-def finmind_data_download(stock_list):
+def finmind_data_download(stock_dict):
     # Initialize manager with your API token
     api_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRlIjoiMjAyNC0wNi0wMSAxMjowNzoyOSIsInVzZXJfaWQiOiJkcmVfaHN1IiwiaXAiOiIzNS4yMzMuMTk5LjIyNyJ9.vdbfK7J1TixjHvBcrk4hZuFtc3oy_cpD6wNurTQuQ7o'
     manager = StockDataManager(api_token)
     
     # Process stock list
-    manager.process_stock_list(stock_list)
+    manager.process_stock_list(stock_dict)

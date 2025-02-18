@@ -26,49 +26,52 @@ def delete_gif_in_fig_folder():
             os.remove(os.path.join(fig_folder_path, file))
 
 def twscreener():
-    # user_agent = random.choice(user_agents_list)
-    # # Set up Edge options
-    # options = Options()
-    # options.add_argument('--headless')  # Run in headless mode
-    # options.add_argument(f'user-agent={user_agent}')
-    # options.add_argument('--no-sandbox')
-    # options.add_argument('--disable-dev-shm-usage')
-    # # Instantiate the Edge WebDriver with the service and options
-    # service = Service(executable_path=driver_path)
-    # driver = webdriver.Edge(service=service, options=options)
+    user_agent = random.choice(user_agents_list)
+    # Set up Edge options
+    options = Options()
+    options.add_argument('--headless')  # Run in headless mode
+    options.add_argument(f'user-agent={user_agent}')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    # Instantiate the Edge WebDriver with the service and options
+    service = Service(executable_path=driver_path)
+    driver = webdriver.Edge(service=service, options=options)
 
-    # try:
-    #     # Run selenium_crawl to get screener stocks list df
-    #     print("Fetching screener list...")
-    #     # selenium_crawl(driver=driver)
-    #     df = pd.read_pickle('data/screener_data.pkl')
+    try:
+        # Run selenium_crawl to get screener stocks list df
+        print("Fetching screener list...")
+        selenium_crawl(driver=driver)
+        df = pd.read_pickle('data/screener_data.pkl')
 
-    #     # print("Fetching high return list...")
-    #     # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
-    #     # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
-    #     # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
-    #     # df = df.iloc[:40, :]
+        # Convert int column to str and add '00' if length < 4
+        df['代號'] = df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
 
-    #     # Loop over df['代號'] and get stock info to add to df
-    #     # print("Fetching stock info...")
-    #     # industry_list = []
-    #     # main_service_list = []
+        # print("Fetching high return list...")
+        # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
+        # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
+        # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
+        # df = df.iloc[:40, :]
 
-    #     # for stock_id in df['代號']:
-    #     #     stock_info = get_stock_info(stock_id, driver=driver)
-    #     #     if stock_info is not None:
-    #     #         industry = stock_info['產業別'].iloc[0]
-    #     #         main_service = stock_info['主要業務'].iloc[0]
-    #     #     else:
-    #     #         industry = None
-    #     #         main_service = None
-    #     #     industry_list.append(industry)
-    #     #     main_service_list.append(main_service)
-    #     #     time.sleep(1)  # Sleep to avoid overwhelming the server
+        # Loop over df['代號'] and get stock info to add to df
+        # print("Fetching stock info...")
+        # industry_list = []
+        # main_service_list = []
 
-    # finally:
-    #     driver.quit()
-    df = pd.read_pickle('data/screener_data.pkl')
+        # for stock_id in df['代號']:
+        #     stock_info = get_stock_info(stock_id, driver=driver)
+        #     if stock_info is not None:
+        #         industry = stock_info['產業別'].iloc[0]
+        #         main_service = stock_info['主要業務'].iloc[0]
+        #     else:
+        #         industry = None
+        #         main_service = None
+        #     industry_list.append(industry)
+        #     main_service_list.append(main_service)
+        #     time.sleep(1)  # Sleep to avoid overwhelming the server
+
+    finally:
+        driver.quit()
+    # df = pd.read_pickle('data/screener_data.pkl')
     # df['產業別'] = industry_list
     # df['主要業務'] = main_service_list
     # df.to_pickle('data/screener_data.pkl')
@@ -109,7 +112,8 @@ def twscreener():
 
     delete_gif_in_fig_folder()
     print("Downloading price trend charts...")
-    finmind_data_download(list(df['代號'].unique()))
+    stock_dict = dict(zip(list(df['代號'].unique()), list(df['名稱'].unique())))
+    finmind_data_download(stock_dict)
     
     # for i, stock_id in enumerate(list(df['代號'].unique())):
     #     for fig_type in ['WEEK', 'DATE']:
