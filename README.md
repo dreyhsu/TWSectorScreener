@@ -1,32 +1,40 @@
-# Stock Screener: Best Performance Stocks in Strong Sectors
-
-This project is a stock screener tool built with Python 3.8. It identifies the best performing stocks within the strongest sectors, providing valuable insights for informed investment decisions.
-
-## Features
-
-- Fetches the historical stock data
-- Analyzes sector performance and identifies strong sectors
-- Screens for top-performing stocks within these sectors
-- Visualizes data through charts and graphs
-
-## Ref
-
-- Wantgoo https://www.wantgoo.com/index/%5E031
-- Goodinfo https://goodinfo.tw/tw/StockList.asp
-- Finmind https://finmindtrade.com/analysis/#/data/api
-- yfinance https://tw.stock.yahoo.com/sector-index
-- HiStock https://histock.tw/twclass/A031
-- Finlab https://ai.finlab.tw/industry/?industry=%E4%BA%BA%E5%B7%A5%E6%99%BA%E6%85%A7:%E6%A9%9F%E5%99%A8%E5%AD%B8%E7%BF%92&tab=%E6%9D%BF%E5%A1%8A%E5%9C%96 
-
-### Prerequisites
-
-- Python 3.8
-- Git
-
-### Steps
-
-1. Clone the repository:
-
-   ```sh
-   git clone https://github.com/dreyhsu/TWSectorScreener.git
-   cd TWSectorScreener
+Here’s an updated README that reflects your new project goals and tools:
+Stock & Global Market Screener: Breakout Monitoring & Strategy Research
+This project is a market screener and strategy research tool built with Python 3.8. It provides daily monitoring of potential breakout assets, stock screening for swing trading and trend following, and quantitative trading research using vectorbt.
+Features
+	•	Daily Monitoring: Tracks possible breakouts in key global indices and assets, including:
+	•	US: QQQ (Nasdaq-100)
+	•	China: 上證 (Shanghai Composite)
+	•	Crypto: BTC
+	•	Commodities: Gold
+	•	Fixed Income: Treasury Bonds
+	•	Trading Strategy Research:
+	•	Uses vectorbt for backtesting and performance analysis.
+	•	Develops and evaluates quantitative trading strategies.
+	•	Stock Screening:
+	•	US & Taiwan stocks screener for swing trading and trend following opportunities.
+Tools & References
+Data Sources & APIs
+	•	Wantgoo: Market Overview
+	•	Goodinfo: Taiwan Stock Market Data
+	•	Finmind: Financial Data API
+	•	yfinance: Yahoo Finance API
+	•	HiStock: Taiwan Sector Classification
+	•	Finlab: Taiwan AI Stock Analysis
+Tools & Libraries
+	•	Vectorbt: Quantitative trading research & backtesting.
+	•	OpenBB Terminal: Advanced financial data analysis.
+	•	yfinance / Finmind / Other APIs: Market data retrieval.
+Setup & Installation
+Prerequisites
+	•	Python 3.8+
+	•	Git
+Installation Steps
+	1.	Clone the repository:
+git clone https://github.com/dreyhsu/TWSectorScreener.git
+cd TWSectorScreener
+	2.	Install dependencies:
+pip install -r requirements.txt
+Usage
+(TBD - Add scripts & examples for monitoring, screening, and backtesting.)
+This updated README better aligns with your new goals. Let me know if you’d like any refinements!

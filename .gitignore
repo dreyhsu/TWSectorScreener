@@ -6,3 +6,5 @@ driver/
 *.markdown
 *.ipynb
 *.csv
+*.bat
+*.png
