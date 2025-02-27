@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .stock-row {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .stock-info {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+        }
+        
+        .stock-id {
+            color: #2980b9;
+            margin-right: 0.5rem;
+        }
+        
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .chart {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .chart img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .chart-title {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stock Chart Viewer</h1>
+    </header>
+    
+    <div class="container">
+        {% for stock in stocks %}
+        <div class="stock-row">
+            <div class="stock-info">
+                <span class="stock-id">{{ stock.id }}</span>
+                <span class="stock-name">{{ stock.name }}</span>
+            </div>
+            
+            <div class="charts-container">
+                {% if stock.daily_chart %}
+                <div class="chart">
+                    <div class="chart-title">Daily Chart</div>
+                    <img src="{{ url_for('static', filename=stock.daily_chart) }}" alt="{{ stock.id }} {{ stock.name }} Daily Chart">
+                </div>
+                {% endif %}
+                
+                {% if stock.weekly_chart %}
+                <div class="chart">
+                    <div class="chart-title">Weekly Chart</div>
+                    <img src="{{ url_for('static', filename=stock.weekly_chart) }}" alt="{{ stock.id }} {{ stock.name }} Weekly Chart">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -10,20 +10,20 @@ driver_path = r'driver\edgedriver_win32\msedgedriver.exe'
 driver_dir = os.path.dirname(driver_path)
 
 # Function to get the installed Edge browser version
-def get_installed_edge_version():
-    try:
-        # Command to get Edge version
-        result = subprocess.run(
-            [r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe', '--version'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        version = result.stdout.strip().split()[-1]
-        return version
-    except Exception as e:
-        print(f"Error retrieving Edge version: {e}")
-        return None
+# def get_installed_edge_version():
+#     try:
+#         # Command to get Edge version
+#         result = subprocess.run(
+#             [r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe', '--version'],
+#             capture_output=True,
+#             text=True,
+#             check=True
+#         )
+#         version = result.stdout.strip().split()[-1]
+#         return version
+#     except Exception as e:
+#         print(f"Error retrieving Edge version: {e}")
+#         return None
 
 # Function to get the latest stable WebDriver version
 def get_latest_stable_driver_version():
@@ -46,7 +46,7 @@ def get_latest_stable_driver_version():
         # Fallback to manual version matching
         try:
             # Extract major version from installed Edge
-            installed_version = get_installed_edge_version()
+            installed_version = 'x'
             if installed_version:
                 major_version = installed_version.split('.')[0]
                 return f"{major_version}.0.2903.87"  # Use a known stable version pattern
@@ -100,13 +100,13 @@ if __name__ == "__main__":
     os.makedirs(driver_dir, exist_ok=True)
 
     # Get installed Edge version
-    installed_edge_version = get_installed_edge_version()
-    if not installed_edge_version:
-        print("Unable to determine installed Edge version.")
-        exit(1)
+    # installed_edge_version = get_installed_edge_version()
+    # if not installed_edge_version:
+    #     print("Unable to determine installed Edge version.")
+    #     exit(1)
 
     # Get latest stable WebDriver version
-    latest_driver_version = get_latest_stable_driver_version()
+    latest_driver_version = '133.0.3065.69'
     if not latest_driver_version:
         print("Unable to determine latest stable WebDriver version.")
         exit(1)
