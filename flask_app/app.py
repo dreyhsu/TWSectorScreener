@@ -13,7 +13,7 @@ def get_stock_images():
     static_folder = os.path.join(app.root_path, 'static')
     
     # Pattern to match: stock_id_chinese-name_D/W_chart.png
-    pattern = re.compile(r'(\d+)_(.+)_(D|W)_chart\.png')
+    pattern = re.compile(r'(\d+[A-Z]?)_([^_]+)_(D|W)_chart\.png')
     
     for filename in os.listdir(static_folder):
         match = pattern.match(filename)
