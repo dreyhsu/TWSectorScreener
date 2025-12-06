@@ -1,4 +1,4 @@
-from crawl_screener import selenium_crawl
+from crawl_screener_safari import selenium_crawl
 from crawl_stock_info import get_stock_info
 from finmind_data_download import finmind_data_download
 import requests
@@ -11,11 +11,9 @@ from config import user_agents_list
 import random
 
 from selenium import webdriver
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.edge.options import Options
+from selenium.webdriver.safari.options import Options
 
 fig_folder_path = r'fig'
-driver_path = r'driver\edgedriver_win32\msedgedriver.exe'
 
 def delete_gif_in_fig_folder():
     # List all files in the folder
@@ -26,21 +24,16 @@ def delete_gif_in_fig_folder():
             os.remove(os.path.join(fig_folder_path, file))
 
 def twscreener():
-    user_agent = random.choice(user_agents_list)
-    # Set up Edge options
+    # Set up Safari options
     options = Options()
-    options.add_argument('--headless')  # Run in headless mode
-    options.add_argument(f'user-agent={user_agent}')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    # Instantiate the Edge WebDriver with the service and options
-    service = Service(executable_path=driver_path)
-    driver = webdriver.Edge(service=service, options=options)
+    # Note: Safari doesn't support headless mode or custom user agents through Selenium
+    # Instantiate the Safari WebDriver
+    driver = webdriver.Safari(options=options)
 
     try:
         # Run selenium_crawl to get screener stocks list df
         print("Fetching screener list...")
-        selenium_crawl(driver=driver)
+        # selenium_crawl(driver=driver)
         df = pd.read_pickle('data/screener_data.pkl')
 
         # Convert int column to str and add '00' if length < 4

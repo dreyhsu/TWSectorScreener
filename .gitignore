@@ -1,4 +1,5 @@
 .env
+config.json
 gpt_question.txt
 data/
 _pycache_/
