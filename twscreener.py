@@ -1,131 +1,109 @@
 from crawl_screener_safari import selenium_crawl
-from crawl_stock_info import get_stock_info
 from finmind_data_download import finmind_data_download
-import requests
 import pandas as pd
-from datetime import datetime
-import time
-from PIL import Image, ImageSequence
 import os
-from config import user_agents_list
-import random
-
+from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.safari.options import Options
 
 fig_folder_path = r'fig'
+TRACKED_FILE = 'data/tracked_stocks.csv'
 
-def delete_gif_in_fig_folder():
-    # List all files in the folder
+def delete_files_in_fig_folder():
+    """Clear old pullback charts in the main fig folder"""
+    if not os.path.exists(fig_folder_path):
+        os.makedirs(fig_folder_path)
     file_list = os.listdir(fig_folder_path)
-    # Iterate through the files and delete those with the .gif extension
     for file in file_list:
-        if file.endswith(".png"):
-            os.remove(os.path.join(fig_folder_path, file))
+        # Only delete files, not directories like 'today'
+        file_path = os.path.join(fig_folder_path, file)
+        if os.path.isfile(file_path) and file.endswith(".png"):
+            os.remove(file_path)
+
+def delete_files_in_today_folder():
+    """Clear charts in fig/today folder"""
+    today_folder = os.path.join(fig_folder_path, 'today')
+    if not os.path.exists(today_folder):
+        os.makedirs(today_folder)
+    for file in os.listdir(today_folder):
+        file_path = os.path.join(today_folder, file)
+        if os.path.isfile(file_path) and file.endswith(".png"):
+            os.remove(file_path)
+
+def load_or_create_tracked_list():
+    """Load the master tracking file or create empty if not exists"""
+    if os.path.exists(TRACKED_FILE):
+        df = pd.read_csv(TRACKED_FILE)
+        df['add_date'] = pd.to_datetime(df['add_date'])
+        df['stock_id'] = df['stock_id'].astype(str).apply(lambda x: x.zfill(4) if x.isdigit() else x)
+        return df
+    else:
+        return pd.DataFrame(columns=['stock_id', 'name', 'add_date', 'initial_open'])
 
 def twscreener():
-    # Set up Safari options
+    # 1. Setup and Cleanup
+    delete_files_in_fig_folder()
+    delete_files_in_today_folder()
+    
+    # 2. Run Crawl
     options = Options()
-    # Note: Safari doesn't support headless mode or custom user agents through Selenium
-    # Instantiate the Safari WebDriver
     driver = webdriver.Safari(options=options)
-
     try:
-        # Run selenium_crawl to get screener stocks list df
         print("Fetching screener list...")
         # selenium_crawl(driver=driver)
-        df = pd.read_pickle('data/screener_data.pkl')
+        
+        screener_df = pd.read_pickle('data/screener_data.pkl')
+        screener_df['代號'] = screener_df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
 
-        # Convert int column to str and add '00' if length < 4
-        df['代號'] = df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
-
-        # print("Fetching high return list...")
-        # df = pd.read_csv(r'C:\Users\User\Downloads\StockList (3).csv')
-        # df['代號'] = df['代號'].apply(lambda x: x.replace("=", '').replace('"', ''))
-        # df = df.sort_values(by='現距1個月低點漲幅', ascending=False)
-        # df = df.iloc[:40, :]
-
-        # Loop over df['代號'] and get stock info to add to df
-        # print("Fetching stock info...")
-        # industry_list = []
-        # main_service_list = []
-
-        # for stock_id in df['代號']:
-        #     stock_info = get_stock_info(stock_id, driver=driver)
-        #     if stock_info is not None:
-        #         industry = stock_info['產業別'].iloc[0]
-        #         main_service = stock_info['主要業務'].iloc[0]
-        #     else:
-        #         industry = None
-        #         main_service = None
-        #     industry_list.append(industry)
-        #     main_service_list.append(main_service)
-        #     time.sleep(1)  # Sleep to avoid overwhelming the server
+        # Save today's raw screener data to CSV
+        daily_csv_name = f'data/screener_data.csv'
+        screener_df.to_csv(daily_csv_name, index=False, encoding='utf-8-sig')
+        print(f"Saved daily screener dump to {daily_csv_name}")
 
     finally:
         driver.quit()
-    # df = pd.read_pickle('data/screener_data.pkl')
-    # df['產業別'] = industry_list
-    # df['主要業務'] = main_service_list
-    # df.to_pickle('data/screener_data.pkl')
-    # df.to_csv('data/screener_data.csv', index=False, encoding='utf-8-sig')
+
+    # 3. Manage Tracked List (Accumulate history)
+    print("Updating tracked stock list...")
+    tracked_df = load_or_create_tracked_list()
+    today = datetime.now()
     
-    # Proceed to download GIFs
-    def download_fig(filename, url):
-        headers = {
-            'User-Agent': random.choice(user_agents_list)
-        }        
-        response = requests.get(url, headers=headers)
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-
-    def change_background_color(input_path, output_path):
-        try:
-            with Image.open(input_path) as img:
-                frames = [frame.copy() for frame in ImageSequence.Iterator(img)]
-
-                # Create a new sequence of frames with white background
-                new_frames = []
-                for frame in frames:
-                    # Convert the frame to RGBA if it's not already in that mode
-                    if frame.mode != 'RGBA':
-                        frame = frame.convert('RGBA')
-                    
-                    # Create a new image with a white background
-                    new_frame = Image.new('RGBA', frame.size, (255, 255, 255))
-                    new_frame.paste(frame, (0, 0), frame)
-                    new_frames.append(new_frame)
-
-                # Save the modified frames as a new GIF
-                new_frames[0].save(output_path, save_all=True, append_images=new_frames[1:], loop=0)
-        except:
-            pass
-
-
-
-    delete_gif_in_fig_folder()
-    print("Downloading price trend charts...")
-    stock_dict = dict(zip(list(df['代號'].unique()), list(df['名稱'].unique())))
-    finmind_data_download(stock_dict)
+    new_entries = []
+    existing_ids = tracked_df['stock_id'].astype(str).tolist()
     
-    # for i, stock_id in enumerate(list(df['代號'].unique())):
-    #     for fig_type in ['WEEK', 'DATE']:
-    #         url = f'https://goodinfo.tw/tw/image/StockPrice/PRICE_{fig_type}_{stock_id}.gif'
-    #         url += '?t=' + datetime.now().isoformat()
-    #         filename = f'{fig_folder_path}/{i+1}_{stock_id}_{fig_type}.gif'
-    #         download_fig(filename, url)
-    #         change_background_color(filename, filename)
-    #         time.sleep(2)
-    # print("Downloading foreign holding trend charts...")
-    # for i, stock_id in enumerate(list(df['代號'].unique())):
-    #     url = f'https://goodinfo.tw/tw/image/StockBuySale/BUY_SALE_DATE_{stock_id}.gif'
-    #     url += '?t=' + datetime.now().isoformat()
-    #     filename = f'{fig_folder_path}/{i+1}_{stock_id}_BUY_SALE_DATE.gif'
-    #     download_fig(filename, url)
-    #     change_background_color(filename, filename)
-    #     time.sleep(2)
+    for _, row in screener_df.iterrows():
+        stock_id = str(row['代號'])
+        stock_name = row['名稱']
+        
+        if stock_id not in existing_ids:
+            new_entries.append({
+                'stock_id': stock_id,
+                'name': stock_name,
+                'add_date': today,
+                'initial_open': None
+            })
+            print(f"New stock added to watchlist: {stock_id} {stock_name}")
     
-    print('Finished.')
+    if new_entries:
+        new_df = pd.DataFrame(new_entries)
+        tracked_df = pd.concat([tracked_df, new_df], ignore_index=True)
+
+    # 4. Remove stocks older than 20 days
+    cutoff_date = today - timedelta(days=20)
+    original_count = len(tracked_df)
+    tracked_df = tracked_df[tracked_df['add_date'] >= cutoff_date]
+    if len(tracked_df) < original_count:
+        print(f"Dropped {original_count - len(tracked_df)} stocks older than 20 days.")
+
+    # 5. Process Data: Plot today's picks AND analyze tracked list for pullbacks
+    print("Processing data...")
+    # Pass both the long-term tracked list AND today's specific list
+    final_tracked_df = finmind_data_download(tracked_df, screener_df)
+    
+    # 6. Save updated master list
+    final_tracked_df.to_csv(TRACKED_FILE, index=False, encoding='utf-8-sig')
+    print(f"Finished. Tracked list saved to {TRACKED_FILE}.")
+    print("Charts saved in 'fig/' (pullbacks) and 'fig/today/' (daily screen results).")
 
 if __name__ == '__main__':
     twscreener()

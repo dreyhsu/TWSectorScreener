@@ -82,4 +82,4 @@ if __name__ == "__main__":
             send_specific_image(img_name)
     else:
         # Send all images from fig/ folder
-        send_all_images_from_folder('fig')
+        send_all_images_from_folder('fig/today')
