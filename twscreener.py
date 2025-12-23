@@ -1,4 +1,4 @@
-from crawl_screener_safari import selenium_crawl
+from crawl_goodinfo_chrome import selenium_crawl
 from finmind_data_download import finmind_data_download
 import pandas as pd
 import os
@@ -46,22 +46,22 @@ def twscreener():
     delete_files_in_today_folder()
     
     # 2. Run Crawl
-    options = Options()
-    driver = webdriver.Safari(options=options)
-    try:
-        print("Fetching screener list...")
-        # selenium_crawl(driver=driver)
-        
-        screener_df = pd.read_pickle('data/screener_data.pkl')
-        screener_df['代號'] = screener_df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
+    # options = Options()
+    # driver = webdriver.Safari(options=options)
+    # try:
+    print("Fetching screener list...")
+    # selenium_crawl()
+    
+    screener_df = pd.read_pickle('data/screener_data.pkl')
+    screener_df['代號'] = screener_df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
 
-        # Save today's raw screener data to CSV
-        daily_csv_name = f'data/screener_data.csv'
-        screener_df.to_csv(daily_csv_name, index=False, encoding='utf-8-sig')
-        print(f"Saved daily screener dump to {daily_csv_name}")
+    # Save today's raw screener data to CSV
+    daily_csv_name = f'data/screener_data.csv'
+    screener_df.to_csv(daily_csv_name, index=False, encoding='utf-8-sig')
+    print(f"Saved daily screener dump to {daily_csv_name}")
 
-    finally:
-        driver.quit()
+    # finally:
+    #     driver.quit()
 
     # 3. Manage Tracked List (Accumulate history)
     print("Updating tracked stock list...")
