@@ -180,11 +180,10 @@ class StockDataManager:
     def process_and_filter_tracked_stocks(self, tracked_df):
         """Processes the long-term tracked list for pullbacks"""
         valid_indices = []
-        print(f"Analyzing {len(tracked_df)} tracked stocks for pullbacks (fig/)...")
+        print(f"Analyzing {len(tracked_df)} tracked stocks for pullbacks...")
         
         for index, row in tracked_df.iterrows():
             stock_id = str(row['stock_id'])
-            stock_name = row['name']
             initial_open = row['initial_open']
             
             try:
@@ -209,25 +208,19 @@ class StockDataManager:
                 if latest['close'] < latest['MA20']:
                     continue
                 
-                valid_indices.append(index)
-                
                 # PULLBACK DETECTION
                 vol_shrink = latest['Trading_Volume'] < latest['Vol_MA5']
                 dist = abs(latest['close'] - latest['MA20']) / latest['MA20']
                 
                 if vol_shrink and dist < 0.02:
                     print(f"*** Pullback Found: {stock_id} ***")
-                    
-                    # 1. Plot Daily
-                    self.plot_stock_chart(df, stock_id, stock_name, "PullbackSetup", subfolder="", timeframe="Daily")
-                    
-                    # 2. Plot Weekly
-                    df_weekly = self.resample_to_weekly(df)
-                    if len(df_weekly) > 10:
-                        self.plot_stock_chart(df_weekly, stock_id, stock_name, "PullbackSetup", subfolder="", timeframe="Weekly")
+                    valid_indices.append(index)
             
             except Exception as e:
                 print(f"Error analyzing {stock_id}: {e}")
+                # Keep stock in list if error occurs (safe default), or drop? 
+                # Previous logic seemed to append index on error in catch block, let's keep it safe.
+                # Actually previous code appended index in except block: valid_indices.append(index)
                 valid_indices.append(index)
                 
         return tracked_df.loc[valid_indices].copy()
@@ -235,11 +228,7 @@ class StockDataManager:
 def finmind_data_download(tracked_df, screener_df=None):
     manager = StockDataManager(api_token = os.getenv('FINMIND_TOKEN'))
     
-    # 1. Plot Screener Results (Daily + Weekly)
-    if screener_df is not None and not screener_df.empty:
-        manager.plot_screener_results(screener_df)
-        
-    # 2. Process Tracked List (Daily + Weekly on Pullback)
+    # Process Tracked List
     cleaned_tracked_df = manager.process_and_filter_tracked_stocks(tracked_df)
     
     return cleaned_tracked_df

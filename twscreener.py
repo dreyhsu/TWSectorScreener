@@ -1,22 +1,25 @@
 from crawl_goodinfo_chrome import selenium_crawl
-from finmind_data_download import finmind_data_download
+from wearn_downloader import download_stock_charts
+from finmind_data_download import StockDataManager
 import pandas as pd
 import os
+import json
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.webdriver.safari.options import Options
 
 fig_folder_path = r'fig'
 TRACKED_FILE = 'data/tracked_stocks.csv'
+HOLDINGS_CONFIG_FILE = 'holdings.json'
 
-def delete_files_in_fig_folder():
-    """Clear old pullback charts in the main fig folder"""
-    if not os.path.exists(fig_folder_path):
-        os.makedirs(fig_folder_path)
-    file_list = os.listdir(fig_folder_path)
+def delete_files_in_filter_folder():
+    """Clear old pullback charts in the fig/filter folder"""
+    filter_folder = os.path.join(fig_folder_path, 'filter')
+    if not os.path.exists(filter_folder):
+        os.makedirs(filter_folder)
+    file_list = os.listdir(filter_folder)
     for file in file_list:
-        # Only delete files, not directories like 'today'
-        file_path = os.path.join(fig_folder_path, file)
+        file_path = os.path.join(filter_folder, file)
         if os.path.isfile(file_path) and file.endswith(".png"):
             os.remove(file_path)
 
@@ -30,6 +33,16 @@ def delete_files_in_today_folder():
         if os.path.isfile(file_path) and file.endswith(".png"):
             os.remove(file_path)
 
+def delete_files_in_holdings_folder():
+    """Clear charts in fig/holdings folder"""
+    holdings_folder = os.path.join(fig_folder_path, 'holdings')
+    if not os.path.exists(holdings_folder):
+        os.makedirs(holdings_folder)
+    for file in os.listdir(holdings_folder):
+        file_path = os.path.join(holdings_folder, file)
+        if os.path.isfile(file_path) and file.endswith(".png"):
+            os.remove(file_path)
+
 def load_or_create_tracked_list():
     """Load the master tracking file or create empty if not exists"""
     if os.path.exists(TRACKED_FILE):
@@ -40,17 +53,32 @@ def load_or_create_tracked_list():
     else:
         return pd.DataFrame(columns=['stock_id', 'name', 'add_date', 'initial_open'])
 
+def load_holdings():
+    """Load holdings from the JSON config file."""
+    if not os.path.exists(HOLDINGS_CONFIG_FILE):
+        print(f"Config file {HOLDINGS_CONFIG_FILE} not found.")
+        return []
+    
+    try:
+        with open(HOLDINGS_CONFIG_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get('holdings', [])
+    except json.JSONDecodeError:
+        print(f"Error decoding {HOLDINGS_CONFIG_FILE}. Please check the JSON format.")
+        return []
+
 def twscreener():
     # 1. Setup and Cleanup
-    delete_files_in_fig_folder()
+    delete_files_in_filter_folder()
     delete_files_in_today_folder()
+    delete_files_in_holdings_folder()
     
     # 2. Run Crawl
     # options = Options()
     # driver = webdriver.Safari(options=options)
     # try:
     print("Fetching screener list...")
-    # selenium_crawl()
+    selenium_crawl()
     
     screener_df = pd.read_pickle('data/screener_data.pkl')
     screener_df['代號'] = screener_df['代號'].astype(str).apply(lambda x: '00' + x if len(x) < 4 else x)
@@ -95,15 +123,42 @@ def twscreener():
     if len(tracked_df) < original_count:
         print(f"Dropped {original_count - len(tracked_df)} stocks older than 20 days.")
 
-    # 5. Process Data: Plot today's picks AND analyze tracked list for pullbacks
+    # 5. Process Data: Filter stocks and download charts
     print("Processing data...")
-    # Pass both the long-term tracked list AND today's specific list
-    final_tracked_df = finmind_data_download(tracked_df, screener_df)
     
+    # Initialize StockDataManager
+    manager = StockDataManager(api_token=os.getenv('FINMIND_TOKEN'))
+    
+    # Download charts for today's screener results
+    print(f"Downloading charts for {len(screener_df)} stocks from today's screener to fig/today/...")
+    for _, row in screener_df.iterrows():
+        stock_id = str(row['代號'])
+        download_stock_charts(stock_id, 'fig/today')
+
+    # Filter tracked list for pullbacks
+    filtered_tracked_df = manager.process_and_filter_tracked_stocks(tracked_df)
+
+    # Download charts for filtered tracked list
+    print(f"Downloading charts for {len(filtered_tracked_df)} filtered stocks to fig/filter/...")
+    for _, row in filtered_tracked_df.iterrows():
+        stock_id = str(row['stock_id'])
+        download_stock_charts(stock_id, 'fig/filter')
+    
+    # Download charts for holdings
+    print("Processing holdings...")
+    holdings = load_holdings()
+    if holdings:
+        print(f"Downloading charts for {len(holdings)} holdings to fig/holdings/...")
+        holdings_folder = os.path.join(fig_folder_path, 'holdings')
+        for stock_id in holdings:
+            download_stock_charts(stock_id, holdings_folder)
+    else:
+        print("No holdings found in config.")
+
     # 6. Save updated master list
-    final_tracked_df.to_csv(TRACKED_FILE, index=False, encoding='utf-8-sig')
+    tracked_df.to_csv(TRACKED_FILE, index=False, encoding='utf-8-sig')
     print(f"Finished. Tracked list saved to {TRACKED_FILE}.")
-    print("Charts saved in 'fig/' (pullbacks) and 'fig/today/' (daily screen results).")
+    print("Charts saved in 'fig/filter/' (pullbacks), 'fig/today/' (daily screen results), and 'fig/holdings/'.")
 
 if __name__ == '__main__':
     twscreener()
