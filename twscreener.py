@@ -3,6 +3,7 @@ from wearn_downloader import download_stock_charts
 from finmind_data_download import StockDataManager
 import pandas as pd
 import os
+import shutil
 import json
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -15,33 +16,23 @@ HOLDINGS_CONFIG_FILE = 'holdings.json'
 def delete_files_in_filter_folder():
     """Clear old pullback charts in the fig/filter folder"""
     filter_folder = os.path.join(fig_folder_path, 'filter')
-    if not os.path.exists(filter_folder):
-        os.makedirs(filter_folder)
-    file_list = os.listdir(filter_folder)
-    for file in file_list:
-        file_path = os.path.join(filter_folder, file)
-        if os.path.isfile(file_path) and file.endswith(".png"):
-            os.remove(file_path)
+    if os.path.exists(filter_folder):
+        shutil.rmtree(filter_folder)
+    os.makedirs(filter_folder)
 
 def delete_files_in_today_folder():
     """Clear charts in fig/today folder"""
     today_folder = os.path.join(fig_folder_path, 'today')
-    if not os.path.exists(today_folder):
-        os.makedirs(today_folder)
-    for file in os.listdir(today_folder):
-        file_path = os.path.join(today_folder, file)
-        if os.path.isfile(file_path) and file.endswith(".png"):
-            os.remove(file_path)
+    if os.path.exists(today_folder):
+        shutil.rmtree(today_folder)
+    os.makedirs(today_folder)
 
 def delete_files_in_holdings_folder():
     """Clear charts in fig/holdings folder"""
     holdings_folder = os.path.join(fig_folder_path, 'holdings')
-    if not os.path.exists(holdings_folder):
-        os.makedirs(holdings_folder)
-    for file in os.listdir(holdings_folder):
-        file_path = os.path.join(holdings_folder, file)
-        if os.path.isfile(file_path) and file.endswith(".png"):
-            os.remove(file_path)
+    if os.path.exists(holdings_folder):
+        shutil.rmtree(holdings_folder)
+    os.makedirs(holdings_folder)
 
 def load_or_create_tracked_list():
     """Load the master tracking file or create empty if not exists"""
