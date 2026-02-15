@@ -16,7 +16,7 @@ def download_image(url, save_path):
     except Exception as e:
         print(f"Error downloading {url}: {e}")
 
-def download_stock_charts(stock_id, folder):
+def download_stock_charts(stock_id, folder, prefix=""):
     """
     Downloads Daily, Weekly, and Monthly charts for a given stock_id into the specified folder.
     """
@@ -31,7 +31,7 @@ def download_stock_charts(stock_id, folder):
     }
 
     for timeframe, url in base_urls.items():
-        filename = f"{stock_id}_{timeframe}.png"
+        filename = f"{prefix}{stock_id}_{timeframe}.png"
         save_path = os.path.join(folder, filename)
         # print(f"Downloading {timeframe} chart for {stock_id}...")
         download_image(url, save_path)

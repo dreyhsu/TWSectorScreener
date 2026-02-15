@@ -113,8 +113,27 @@ def main():
     # 1. Fetch and filter Sectors (1M and 3M positive)
     df_sectors = obb.equity.compare.groups(group="sector", metric="performance", provider="finviz").to_df()
     df_sectors = clean_performance(df_sectors)
-    qualified_sectors = df_sectors[(df_sectors['performance_1m'] > 0) & (df_sectors['performance_3m'] > 0)]['name'].tolist()
-    print(f"Qualified Sectors: {qualified_sectors}")
+    
+    # Filter for positive performance and rank by 3-month performance
+    positive_sectors = df_sectors[(df_sectors['performance_1m'] > 0) & (df_sectors['performance_3m'] > 0)].copy()
+    ranked_sectors = positive_sectors.sort_values(by='performance_3m', ascending=False)
+    
+    # Slice for "Up Middle" (middle 33%)
+    n = len(ranked_sectors)
+    if n > 0:
+        start_idx = int(n * 0.33)
+        end_idx = int(n * 0.66)
+        
+        if start_idx == end_idx:
+            up_middle_sectors = ranked_sectors.iloc[start_idx : start_idx + 1]
+        else:
+            up_middle_sectors = ranked_sectors.iloc[start_idx:end_idx]
+            
+        qualified_sectors = up_middle_sectors['name'].tolist()
+    else:
+        qualified_sectors = []
+        
+    print(f"Qualified 'Up Middle' Sectors: {qualified_sectors}")
 
     # 2. Fetch and filter Industries (1M positive)
     df_industries = obb.equity.compare.groups(group="industry", metric="performance", provider="finviz").to_df()
@@ -146,7 +165,7 @@ def main():
         results['industry'].isin(qualified_industries)
     ].copy()
 
-    # 4.1 Generate Summary and Filter for Top 10 Industries
+    # 4.1 Generate Summary and Filter for Top Industries
     if not filtered_results.empty:
         summary_table = filtered_results.groupby(['sector', 'industry']).size().reset_index(name='counts')
         summary_table = summary_table.sort_values(by='counts', ascending=False)
@@ -154,15 +173,15 @@ def main():
         print(summary_table.to_string(index=False))
         print("-" * 50)
         
-        # Get top 10 industries by count
-        top_10_industries = summary_table.head(10)['industry'].tolist()
-        filtered_results = filtered_results[filtered_results['industry'].isin(top_10_industries)]
+        # Get top industries by count
+        top_industries = summary_table['industry'].tolist()
+        filtered_results = filtered_results[filtered_results['industry'].isin(top_industries)]
 
     # Sort by sector as per URL parameter o=sector
     filtered_results = filtered_results.sort_values(by='sector')
     
     symbols = filtered_results['symbol'].tolist()
-    print(f"Found {len(filtered_results)} matching stocks in top 10 industries. Downloading charts for top 10: {symbols}")
+    print(f"Found {len(filtered_results)} matching stocks in top industries. Downloading charts for : {symbols}")
 
     if not symbols:
         print("No stocks matched the criteria.")
@@ -171,7 +190,7 @@ def main():
     # 5. Download Charts
     session = setup_session()
     
-    # Get top 10 rows to get symbol, sector, and industry
+    # Get rows to get symbol, sector, and industry
     download_list = filtered_results.to_dict('records')
     
     for item in tqdm(download_list):
