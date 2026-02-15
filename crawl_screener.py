@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.edge.service import Service
 from selenium.webdriver.edge.options import Options
 import pandas as pd
@@ -23,7 +25,36 @@ def selenium_crawl(driver=None):
     try:
         driver.get(url)
 
-        # try:
+        # Handle Ad (Using your ID)
+        print("Checking for ads...")
+        time.sleep(3) # Wait for ad animation as it often shows up with 2-3s delay
+
+        try:
+            # Strategy A: Primary - Click the specific button ID
+            WebDriverWait(driver, 5).until(
+                EC.element_to_be_clickable((By.ID, "ats-interstitial-button"))
+            ).click()
+            print("Ad closed via ID: ats-interstitial-button")
+            time.sleep(1)
+        except:
+            # Strategy B: Backup - Press ESC key
+            try:
+                print("Primary ID not found, trying ESC key...")
+                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                time.sleep(1)
+            except:
+                pass
+            
+            # Strategy C: Nuclear - Javascript removal
+            try:
+                print("Trying JS removal as last resort...")
+                driver.execute_script("""
+                    var overlays = document.querySelectorAll('div[class*="modal"], div[class*="ad"], iframe[id*="google_ads"], [id*="ats-interstitial"]');
+                    overlays.forEach(function(element) { element.remove(); });
+                """)
+            except:
+                pass
+
         # Wait for the JavaScript to fetch and display the table
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.ID, 'tblStockList'))

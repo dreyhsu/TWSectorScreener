@@ -10,7 +10,7 @@ from urllib3.util.retry import Retry
 # Configuration
 INPUT_CSV = "data/finviz/screener_results.csv"
 BASE_URL = "https://charts2-node.finviz.com/chart.ashx"
-OUTPUT_DIR = "fig/finviz_holding"
+OUTPUT_DIR = "fig/finviz_2026"
 
 # List of common User-Agents to rotate
 USER_AGENTS = [
@@ -106,15 +106,23 @@ def main():
 
     start_time = time.time()
     try:
-        df = pd.read_csv(INPUT_CSV)
-        if "symbol" not in df.columns:
-            print("Error: 'symbol' column not found in CSV.")
-            return
+        # df = pd.read_csv(INPUT_CSV)
+        # if "symbol" not in df.columns:
+        #     print("Error: 'symbol' column not found in CSV.")
+        #     return
             
-        symbols = df["symbol"].tolist()
+        # symbols = df["symbol"].tolist()
         symbols = [
-            "ACMR", "ALAB", "AMZN", "BEAM", "BRZE", "EOSE", 
-            "GDXJ", "GH", "GOOG", "MIST", "ODD", "TDY", "UUUU"
+            "INCY",  # Incyte Corporation
+            "MU",    # Micron Technology
+            "CLS",   # Celestica
+            "ALL",   # Allstate
+            "APP",   # AppLovin
+            "VST",   # Vistra Corp.
+            "WDC",   # Western Digital
+            "JXN",   # Jackson Financial
+            "GCT",   # GigaCloud Technology
+            "MOD"    # Modine Manufacturing
         ]
         # ["ALAB", "BEAM", "EOSE", "GH"]
         print(f"Found {len(symbols)} symbols. Starting download...")

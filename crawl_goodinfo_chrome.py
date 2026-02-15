@@ -6,6 +6,8 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 def selenium_crawl():
     # Your URL
@@ -19,7 +21,7 @@ def selenium_crawl():
     options.add_argument('--no-first-run')
     
     # Use Undetected Chromedriver (Magic fix for Goodinfo)
-    driver = uc.Chrome(options=options, version_main=143)
+    driver = uc.Chrome(options=options, version_main=144)
 
     try:
         driver.maximize_window()
@@ -28,13 +30,34 @@ def selenium_crawl():
         driver.get(url)
         
         # 3. Handle Ad (Using your ID)
+        print("Checking for ads...")
+        time.sleep(15) # Wait for ad animation as it often shows up with 2-3s delay
+
         try:
+            # Strategy A: Primary - Click the specific button ID
             WebDriverWait(driver, 15).until(
                 EC.element_to_be_clickable((By.ID, "ats-interstitial-button"))
             ).click()
-            print("Ad closed.")
+            print("Ad closed via ID: ats-interstitial-button")
+            time.sleep(1)
         except:
-            print("No ad.")
+            # Strategy B: Backup - Press ESC key
+            try:
+                print("Primary ID not found, trying ESC key...")
+                ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+                time.sleep(1)
+            except:
+                pass
+            
+            # Strategy C: Nuclear - Javascript removal
+            try:
+                print("Trying JS removal as last resort...")
+                driver.execute_script("""
+                    var overlays = document.querySelectorAll('div[class*="modal"], div[class*="ad"], iframe[id*="google_ads"], [id*="ats-interstitial"]');
+                    overlays.forEach(function(element) { element.remove(); });
+                """)
+            except:
+                pass
 
         # 4. Get Table
         WebDriverWait(driver, 30).until(

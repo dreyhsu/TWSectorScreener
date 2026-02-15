@@ -59,7 +59,7 @@ def selenium_crawl(driver=None):
             try:
                 print("Trying JS removal as last resort...")
                 driver.execute_script("""
-                    var overlays = document.querySelectorAll('div[class*="modal"], div[class*="ad"], iframe[id*="google_ads"]');
+                    var overlays = document.querySelectorAll('div[class*="modal"], div[class*="ad"], iframe[id*="google_ads"], [id*="ats-interstitial"]');
                     overlays.forEach(function(element) { element.remove(); });
                 """)
             except:

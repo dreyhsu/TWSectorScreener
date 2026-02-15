@@ -1,6 +1,8 @@
 from crawl_goodinfo_chrome import selenium_crawl
 from wearn_downloader import download_stock_charts
 from finmind_data_download import StockDataManager
+from fetch_30min_data import main as fetch_30min
+from analyze_screener_themes import main as analyze_themes
 import pandas as pd
 import os
 import shutil
@@ -150,6 +152,11 @@ def twscreener():
     tracked_df.to_csv(TRACKED_FILE, index=False, encoding='utf-8-sig')
     print(f"Finished. Tracked list saved to {TRACKED_FILE}.")
     print("Charts saved in 'fig/filter/' (pullbacks), 'fig/today/' (daily screen results), and 'fig/holdings/'.")
+
+    # 7. Additional processing
+    print("Fetching 30-minute data and analyzing themes...")
+    fetch_30min()
+    analyze_themes()
 
 if __name__ == '__main__':
     twscreener()
