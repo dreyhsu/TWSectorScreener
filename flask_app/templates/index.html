@@ -2,109 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Chart Viewer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        
-        .stock-row {
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-        }
-        
-        .stock-info {
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #eee;
-            font-weight: bold;
-        }
-        
-        .stock-id {
-            color: #2980b9;
-            margin-right: 0.5rem;
-        }
-        
-        .charts-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .chart {
-            flex: 1;
-            min-width: 300px;
-        }
-        
-        .chart img {
-            max-width: 100%;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .chart-title {
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-        
-        @media (max-width: 768px) {
-            .charts-container {
-                flex-direction: column;
-            }
-        }
-    </style>
+    <title>TW Sector Screener Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <h1>Stock Chart Viewer</h1>
-    </header>
-    
-    <div class="container">
-        {% for stock in stocks %}
-        <div class="stock-row">
-            <div class="stock-info">
-                <span class="stock-id">{{ stock.id }}</span>
-                <span class="stock-name">{{ stock.name }}</span>
+<body class="bg-light">
+    <div class="container my-4">
+        <h1 class="mb-4">TW Sector Screener & Portfolio Dashboard</h1>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span>Daily Screener Visualizations</span>
+                <span class="badge bg-secondary">Latest Results</span>
             </div>
-            
-            <div class="charts-container">
-                {% if stock.daily_chart %}
-                <div class="chart">
-                    <div class="chart-title">Daily Chart</div>
-                    <img src="{{ url_for('static', filename=stock.daily_chart) }}" alt="{{ stock.id }} {{ stock.name }} Daily Chart">
+            <div class="card-body">
+                <div class="row">
+                    {% for chart in charts %}
+                    <div class="col-md-3 col-sm-6 mb-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <img src="{{ url_for('serve_image', filename=chart) }}" alt="{{ chart }}" class="card-img-top border rounded" onerror="this.style.display='none'">
+                            <div class="card-footer bg-white border-0 text-center">
+                                <small class="text-muted fw-bold">{{ chart.split('_')[0] }} - {{ ' '.join(chart.split('_')[1:]).replace('.png', '') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endif %}
-                
-                {% if stock.weekly_chart %}
-                <div class="chart">
-                    <div class="chart-title">Weekly Chart</div>
-                    <img src="{{ url_for('static', filename=stock.weekly_chart) }}" alt="{{ stock.id }} {{ stock.name }} Weekly Chart">
-                </div>
-                {% endif %}
             </div>
         </div>
-        {% endfor %}
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">0050 vs Strategy Performance</div>
+                    <div class="card-body">
+                        <canvas id="performanceChart"></canvas>
+                        <div class="mt-3 text-center">
+                            <strong>Free Margin: </strong><span id="marginDisplay">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-warning text-dark">Volume Shrinkage Screener (Past Month)</div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Name</th>
+                                    <th>Volume Drop</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stock in volume_shrinkage %}
+                                <tr>
+                                    <td>{{ stock.ticker }}</td>
+                                    <td>{{ stock.name }}</td>
+                                    <td class="text-danger fw-bold">{{ stock.vol_drop_pct }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Current Portfolio Holdings</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Ticker</th>
+                            <th>Name</th>
+                            <th>Shares</th>
+                            <th>Entry Price</th>
+                            <th>Current Price</th>
+                            <th class="pe-3 text-end">Profit/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in holdings %}
+                        <tr>
+                            <td class="ps-3 fw-bold">{{ item.ticker }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.shares }}</td>
+                            <td>${{ item.entry_price }}</td>
+                            <td>${{ item.current_price }}</td>
+                            <td class="pe-3 text-end {% if item.current_price > item.entry_price %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                {% if item.entry_price > 0 %}
+                                    {{ (((item.current_price - item.entry_price) / item.entry_price) * 100) | round(2) }}%
+                                {% else %}
+                                    0.0%
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Chart.js Configuration
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const perfChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Time ticks
+                datasets: [
+                    { label: '0050 ETF', borderColor: 'blue', data: [], fill: false, tension: 0.1 },
+                    { label: 'Strategy', borderColor: 'green', data: [], fill: false, tension: 0.1 }
+                ]
+            },
+            options: { responsive: true, animation: false }
+        });
+
+        let tickCount = 0;
+
+        // Fetch performance data periodically
+        async function updatePerformance() {
+            try {
+                const response = await fetch('/api/performance');
+                const data = await response.json();
+                
+                document.getElementById('marginDisplay').innerText = "$" + data.free_margin;
+
+                // Only append new data points if margin > 0, simulating active trade execution
+                if (data.free_margin > 0 || tickCount === 0) {
+                    const timeLabel = new Date().toLocaleTimeString();
+                    
+                    // Keep the chart clear by shifting old data off after 10 ticks
+                    if (perfChart.data.labels.length > 10) {
+                        perfChart.data.labels.shift();
+                        perfChart.data.datasets[0].data.shift();
+                        perfChart.data.datasets[1].data.shift();
+                    }
+                    
+                    perfChart.data.labels.push(timeLabel);
+                    perfChart.data.datasets[0].data.push(data['0050_return']);
+                    perfChart.data.datasets[1].data.push(data['strategy_return']);
+                    perfChart.update();
+                }
+                tickCount++;
+            } catch (error) {
+                console.error("Error fetching performance data:", error);
+            }
+        }
+
+        // Poll the Flask API every 3 seconds
+        setInterval(updatePerformance, 3000);
+        updatePerformance(); // Trigger the first call immediately
+    </script>
 </body>
 </html>

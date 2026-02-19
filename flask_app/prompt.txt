@@ -1,0 +1,24 @@
+Create a demo Flask web application (flask_app/) for a stock market dashboard with the following three features:
+
+Daily Screener Visualizations: * Display charts of the daily stock screener results.
+
+Source the images/plots from the fig/today directory and render them on the dashboard.
+
+/Users/chihjuihsu/Documents/python_script/TWSectorScreener/fig/today/4925_1_monthly.png
+/Users/chihjuihsu/Documents/python_script/TWSectorScreener/fig/today/4925_2_weekly.png
+/Users/chihjuihsu/Documents/python_script/TWSectorScreener/fig/today/4925_3_daily.png
+/Users/chihjuihsu/Documents/python_script/TWSectorScreener/fig/today/4925_4_30min.png
+
+Performance Comparison & Portfolio Tracking:
+
+Generate a comparison chart between the 0050 ETF (benchmark) and the screener strategy performance.
+
+Implement logic to update the strategy performance periodically (or per tick) as long as there is "free margin" available.
+
+Display a table or list of the current stock holdings in the portfolio.
+
+Volume Analysis Screener:
+
+Identify and list stocks that have shown a significant shrinkage in volume over the past month.
+
+Display these results in a clear list or table format.
