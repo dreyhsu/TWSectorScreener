@@ -1,3 +1,99 @@
-modify the following code, i want to add feature which save the table from screener_data.pkl every day, so there will be a file, append the every day screened stock table to it every day. and save the open of stocks. every day i want to look for the pull back stocks from the file. look back 20 days stock list from the file and and use finmind to download stock data.
-pull back define as volumn shrink and close price go side way or even drop close to ma20
-when a stock close below the open it selected to the file, or close below ma20, the stock should be remove from the file.
+modify the following prompt to make it clear and readable, i want to use it to do deepresearch.
+help me construct a trading sop, list out 5 possible ways to screen, select symbols, entry, exist, add, sop to trade stocks, and evalute which way is better to trade high volitility stocks with breakout.
+here is how i find the sector rotation and breakout symbols.
+1. select top 5 hot industries from https://www.cmoney.tw/finance/f00016.aspx?o=1&o2=4
+2. check in these 5 industries, calculate the percentage of the stocks make 6 month new high
+3. select top 3 industries with high percentage
+4. select 5 symbols from the industries
+5. trade the symbols with sop
+here is the entry i think
+for the top 3 industries, get the real time price of the symbols, and if more than 50% of the symbols in a industry price higher than each symbol 75% of the yesterday price range. find the symbol with the highest gain today and buy.
+for add, 1. add when breakout the swing range again, and the stop loss price set at the bottom of the breakout candle, also above break even point(do not loss money after add)
+2. draw a trendline or use ma20, add when price pull back to the trendline or ma20, also above break even point(do not loss money after add)
+
+
+
+> **Subject:** Quantitative Analysis and SOP Development for Sector-Rotation Momentum Trading
+> **Objective:** > Develop a comprehensive Standard Operating Procedure (SOP) for a stock trading strategy focused on **Sector Rotation** and **High-Volatility Breakouts**, specifically utilizing data from the CMoney Taiwan market dashboard.
+> **Part 1: Strategy Logic Evaluation**
+> Analyze the following 5-step selection process and evaluate its effectiveness for capturing high-volatility breakouts:
+> 1. Identify Top 5 industries by volume/momentum (via CMoney).
+> 2. Calculate the "Relative Strength Internal Breadth": % of stocks in these industries hitting 6-month highs.
+> 3. Filter for the Top 3 industries based on this breadth.
+> 4. Select the top 5 individual symbols from top industries.
+> 5. **Entry Trigger:** Execute a "Group Breakout" trade if >50% of industry symbols trade above the 75th percentile of their previous day’s range. Buy the symbol with the highest intraday gain.
+> 
+> 
+> **Part 2: SOP Development (5 Variations)**
+> Propose **5 distinct Trading SOPs** based on the logic above. Each SOP must clearly define:
+> * **Screening & Selection:** Methodology for narrowing the universe.
+> * **Entry:** Specific price action or indicator triggers.
+> * **Exit/Stop Loss:** Initial risk management.
+> * **Position Sizing/Adding:** Rules for scaling into winning trades (Pyramiding).
+> 
+> 
+> **Part 3: Comparative Analysis for High Volatility**
+> Compare two specific **"Adding" (Scaling-in)** methods for high-volatility stocks:
+> * **Method A (Breakout Scaling):** Adding on a new swing range breakout with the stop loss moved to the bottom of the breakout candle (ensuring a "no-loss" break-even floor).
+> * **Method B (Mean Reversion Scaling):** Adding on pullbacks to the 20-period MA or a dynamic trendline.
+> 
+> 
+> **Deliverable:**
+> Determine which of the 5 SOPs is statistically superior for trading high-volatility breakouts and provide a finalized, step-by-step checklist for daily execution.
+
+---
+
+## Why this works better
+
+* **Terminology:** Using terms like "Internal Breadth" and "Relative Strength" signals the AI to look for professional-grade financial models.
+* **Clarity on "Adding":** It frames your "Add" rules as a comparison, which forces the research tool to look for backtest data or pros/cons for each.
+* **Structure:** By breaking it into "Parts," the Deep Research agent will provide a modular response that is much easier to read than a single block of text.
+
+### A Quick Tip on your "Entry" Logic
+
+Your entry rule—buying when symbols are in the **top 75% of yesterday's range**—is essentially a "Volatility Contraction/Expansion" play. In high volatility environments, this can lead to "whipsaws" (fakeouts).
+
+**Would you like me to generate a specific checklist or table you can use to track these 5 industries daily once the research is done?**
+
+Role & Objective:
+Act as an expert quantitative analyst and systems trader. Your objective is to deeply evaluate 5 specific Standard Operating Procedures (SOPs) for trading high-volatility breakout stocks within hot rotating sectors.
+
+The 5 SOPs for Evaluation:
+
+Pure Momentum: Buy highest % intraday gainer on daily high breakout. Add on next swing high. Stop at breakout candle low.
+
+EOD Confirmation: Buy in the last 30 mins if holding >75% of daily range. Add on next day continuation. Stop at entry day low.
+
+VCP (Volatility Contraction): Buy breakouts only after 3+ days of tight consolidation. Add on MA20 pullback. Stop below consolidation range.
+
+Break-and-Retest: Let breakout happen, do not buy. Buy the first pullback that successfully retests the breakout line. Add on next trendline test. Stop below retest bounce.
+
+Breadth + Flow Divergence: Buy breakouts only if backed by heavy top-tier broker accumulation (籌碼集中). Add on MA20 pullback. Stop at breakout candle low.
+
+Part 1: Profitability vs. Doability Matrix
+Evaluate each SOP based on the following constraints, assuming a high-volatility environment (e.g., fast-moving tech hardware, CPO, or memory sectors):
+
+her is how i find the sector rotation and breakout symbols.
+> 1. Identify Top 5 industries by volume/momentum (via CMoney).
+> 2. Calculate the "Relative Strength Internal Breadth": % of stocks in these industries hitting 6-month highs.
+> 3. Filter for the Top 3 industries based on this breadth.
+> 4. Select the top 5 individual symbols from top industries.
+
+Expected Profitability: Win rate vs. Risk/Reward ratio. How vulnerable is this SOP to intraday whipsaws and fake-outs?
+
+Execution Feasibility (Doability): How much screen time is required? How bad will slippage be for a retail trader executing this?
+
+Systematic Backtesting Viability: How easily can the entry/exit rules be coded into algorithmic screeners like FinLab or OpenBB?
+
+Part 2: Deep Dive into the Winning SOP
+Select the single most optimal SOP (or a hybrid of the best elements) that balances high upside with downside protection against false breakouts. Provide a highly detailed, step-by-step trading plan for this winning SOP, including:
+
+Pre-Market / End-of-Day Screening: Exact metrics to look for.
+
+The Setup: What the chart must look like before the trigger.
+
+The Trigger (Entry): The exact conditions for hitting the buy button.
+
+Position Sizing & Adding: Mathematical rules for scaling in (e.g., MA20 pullbacks) while moving the stop to break-even.
+
+Exit Strategy: When to take partial profits and how to trail the final stop loss.

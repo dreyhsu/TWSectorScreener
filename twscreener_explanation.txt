@@ -1,0 +1,40 @@
+# Explanation of twscreener.py
+
+`twscreener.py` serves as the main execution script for the Taiwan Stock Sector Screener project. It orchestrates the process of crawling data, updating a watchlist of stocks, and generating visualizations.
+
+## Key Functions & Workflow
+
+### 1. Setup and Cleanup
+- **Cleans up old charts**: 
+  - Deletes existing `.png` files in the `fig/filter.` folder (used for pullback charts).
+  - Deletes existing `.png` files in the `fig/today/` folder (used for today's screener results).
+- This ensures that each run produces a fresh set of visualizations without clutter from previous executions.
+
+### 2. Data Crawling
+- **Fetches new screener data**: 
+  - Calls `selenium_crawl()` from the `crawl_goodinfo_chrome` module.
+  - This likely automates a web browser to scrape a specific stock screener (e.g., Goodinfo) and saves the raw data to `data/screener_data.pkl`.
+- **Formats and Archives**:
+  - Reads the pickled data, formats stock IDs (padding with zeros to ensure 4 digits), and saves a copy to `data/screener_data.csv` for easy inspection.
+
+### 3. Watchlist Management (Tracked Stocks)
+- **Maintains a generic watchlist**:
+  - Loads an existing watchlist from `data/tracked_stocks.csv`.
+  - Compares the newly crawled stocks against the existing watchlist.
+  - **Adds new stocks**: If a stock from the daily screener is not already being tracked, it is added to the list with the current date (`add_date`).
+- **Pruning**:
+  - Automatically removes stocks that were added more than **20 days ago**. This keeps the watchlist focused on recent potential opportunities.
+
+### 4. Visualization
+- **Downloads data and charts**:
+  - Downloads and update stock price data use function load_and_update_data() from finmind_data_download.py
+  - Load the price data of stocks in tracked_df. and use process_and_filter_tracked_stocks() to get filter stocks
+  - Downloads screener stocks daily, weekly, monthly charts from stock.wearn.com saved to the `fig/today` folders.
+  - Downloads filter stocks daily, weekly, monthly charts from stock.wearn.com saved to the `fig/filter` folders.
+  - (monthly example) https://stock.wearn.com/finance_mchart.asp?stockid=2331&timekind=2&timeblock=2&sma1=&sma2=&sma3=&volume=0&indicator1=Vol&indicator2=None&indicator3=OBV
+  - (weekly example) https://stock.wearn.com/finance_wchart.asp?stockid=2331&timekind=1&timeblock=3&sma1=&sma2=&sma3=&volume=0&indicator1=Vol&indicator2=None&indicator3=OBV
+  - (daily example) https://stock.wearn.com/finance_chart.asp?stockid=2331&timekind=0&timeblock=270&sma1=&sma2=&sma3=&volume=0&indicator1=Vol&indicator2=None&indicator3=OBV
+
+### 5. Finalize
+- **Saves State**:
+  - The updated watchlist (with any new additions and after removing old entries) is saved back to `data/tracked_stocks.csv`.

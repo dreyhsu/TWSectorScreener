@@ -1,0 +1,17 @@
+I need to conduct deep research into the historical efficacy and robustness of a specific "Sector Rotation & Momentum" stock trading strategy.
+
+Please execute the following research plan:
+
+(1) Search for academic papers, quantitative finance articles, and hedge fund notes analyzing sector rotation strategies, specifically comparing the risk-adjusted returns of middle-tier momentum sectors against top-tier performing sectors.
+
+(2) Find research and backtesting reports evaluating the 52-week high effect specifically within mid-cap and large-cap equity universes with high liquidity.
+
+(3) Investigate quantitative studies that combine 52-week high breakout strategies with moving average alignment criteria, such as price over the 200-day simple moving average and short-term moving average over medium-term moving average, to assess improvements in hit rates.
+
+(4) Search for literature on the impact of adding short-term momentum filters, like positive 1-week and greater than 10 percent quarterly performance, to momentum trading strategies.
+
+(5) Analyze backtesting reports to determine the most profitable screening and rebalancing frequency for sector momentum strategies, comparing monthly screening against other timeframes.
+
+(6) Synthesize findings on the success rate of 52-week high breakouts when explicitly filtered by the underlying sector strength and momentum.
+
+(7) Identify known pitfalls and regime dependencies for these combined momentum and trend-following strategies, particularly assessing their performance and drawdown risks during high-volatility periods or bear markets.

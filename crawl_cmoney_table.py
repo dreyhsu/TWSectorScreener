@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from wearn_downloader import download_stock_charts
 
 def crawl_cmoney():
-    url = "https://www.cmoney.tw/finance/f00016.aspx?o=1&o2=4"
+    url = "https://www.cmoney.tw/finance/f00016.aspx?o=1&o2=1"
     
     # Initialize Chrome with Anti-Detection features
     options = uc.ChromeOptions()
@@ -47,48 +47,22 @@ def crawl_cmoney():
         df.to_csv("data/cmoney_data.csv", index=False, encoding='utf-8-sig')
         print("Data saved to data/cmoney_data.csv")
 
-        # --- Implement "Up Middle" Strategy ---
-        print("\n--- Applying 'Up Middle' Strategy ---")
+        # --- Implement "Top 5 Gainers" Strategy ---
+        print("\n--- Applying 'Top 5 Gainers' Strategy ---")
         
         # 1. Clean data: Remove '%' and convert to float
-        df['一月(%)_val'] = pd.to_numeric(df['一月(%)'].astype(str).str.replace('%', ''), errors='coerce')
-        df['一季(%)_val'] = pd.to_numeric(df['一季(%)'].astype(str).str.replace('%', ''), errors='coerce')
+        df['一日(%)_val'] = pd.to_numeric(df['一日(%)'].astype(str).str.replace('%', ''), errors='coerce')
         
-        # 2. Filter: 1-Month > 0 AND 3-Month > 0
-        qualified_df = df[
-            (df['一月(%)_val'] > 0) & 
-            (df['一季(%)_val'] > 0)
-        ].copy()
+        # 2. Rank: Sort by 1-Day performance (descending)
+        ranked_df = df.sort_values(by='一日(%)_val', ascending=False).reset_index(drop=True)
         
-        print(f"Qualified sectors (Positive 1M & 3M): {len(qualified_df)}")
+        # 3. Select Top 5
+        selected_df = ranked_df.head(5)
         
-        # 3. Rank: Sort by 3-Month performance (descending)
-        ranked_df = qualified_df.sort_values(by='一季(%)_val', ascending=False).reset_index(drop=True)
+        print(f"Selected Top 5 sectors:")
+        print(selected_df[['分類', '一日(%)']])
         
-        # 4. Select Middle 33%
-        n = len(ranked_df)
-        if n > 0:
-            start_idx = int(n * 0.33)
-            end_idx = int(n * 0.66)
-            
-            # Ensure we select at least one if possible, or handle small lists
-            if start_idx == end_idx and n > 0:
-                 # If list is small (e.g. 1 or 2 items), the logic might give empty range.
-                 # Let's just take the middle element or the whole list if very small.
-                 # For strict adherence to "middle 33%", if n < 3, it might be 0.
-                 # Let's apply a minimum of 1 sector if n >= 1
-                 mid_point = n // 2
-                 selected_df = ranked_df.iloc[mid_point:mid_point+1]
-            else:
-                 selected_df = ranked_df.iloc[start_idx:end_idx]
-            
-            print(f"Selected {len(selected_df)} sectors (Middle 33% of {n}):")
-            print(selected_df[['分類', '一月(%)', '一季(%)']])
-            
-            target_sectors = selected_df['分類'].tolist()
-        else:
-            print("No sectors qualified.")
-            target_sectors = []
+        target_sectors = selected_df['分類'].tolist()
 
         symbol_sector_map = {}
 
@@ -200,10 +174,10 @@ def crawl_cmoney():
             print(sorted_symbols)
             
             # Save symbols to file
-            with open("data/up_middle_symbols.txt", "w", encoding='utf-8') as f:
+            with open("data/top_gainer_symbols.txt", "w", encoding='utf-8') as f:
                 for s in sorted_symbols:
                     f.write(f"{s}\n")
-            print("Symbols saved to data/up_middle_symbols.txt")
+            print("Symbols saved to data/top_gainer_symbols.txt")
 
             # --- Download Charts ---
             output_folder = "fig/cmoney_industry"

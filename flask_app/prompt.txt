@@ -22,3 +22,6 @@ Volume Analysis Screener:
 Identify and list stocks that have shown a significant shrinkage in volume over the past month.
 
 Display these results in a clear list or table format.
+
+1. 震盪突破警示，當前盤整範圍
+2. 5分鐘價格更新

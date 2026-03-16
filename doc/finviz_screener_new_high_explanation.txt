@@ -1,0 +1,29 @@
+# Finviz New High Screener Filter Explanation
+
+This document explains the filtering rules used in `finviz_screener_new_high.py` to identify momentum stocks with steady growth.
+
+## 1. Sector Performance Rules ("Up Middle" Strategy)
+Sectors must show consistent positive growth but are selected to avoid over-extended "top" performers:
+*   **1-Month Performance**: Must be positive (> 0%).
+*   **3-Month Performance**: Must be positive (> 0%).
+*   **Selection Logic**: Qualified sectors are ranked by 3-month performance (descending). The script selects the **middle 33%** (the "Up Middle" segment) of these qualified sectors. This strategy targets sectors with established but potentially sustainable momentum.
+
+## 2. Industry Performance Rules
+*   **1-Month Performance**: Must be positive (> 0%).
+
+## 3. Finviz Screener (Technical & Momentum)
+Stocks are filtered using the following criteria via the Finviz provider:
+*   **Market Cap**: Mid Cap ($2bln+) and over.
+*   **Average Volume**: Over 300K (Ensuring liquidity).
+*   **52-Week High/Low**: New High (Price reaching a 1-year peak).
+*   **Performance**: Week Up (Positive performance over the last 5 days).
+*   **Performance 2**: Quarter +10% (Strong intermediate-term momentum).
+*   **Moving Averages**:
+    *   **20-Day SMA**: Above SMA50 (Short-term trend stronger than medium-term).
+    *   **50-Day SMA**: Below SMA20 (Re-confirmation of short-term strength).
+    *   **200-Day SMA**: Price above SMA200 (Long-term bullish trend).
+
+## 4. Final Aggregation and Processing
+1.  **Intersection**: Only stocks that satisfy the technical filters AND belong to the "Up Middle" sectors and qualified industries are retained.
+2.  **Summary**: The script generates a summary table of the counts of matching stocks per sector and industry.
+3.  **Chart Download**: Weekly and monthly charts are downloaded for all qualifying symbols to the `fig/finviz_new_high` directory.
